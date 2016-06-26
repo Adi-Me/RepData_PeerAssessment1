@@ -1,66 +1,80 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
-```{r options, echo = FALSE}
-    knitr::opts_chunk$set(fig.width=8, fig.height=6, fig.path='figure/', warning=FALSE, message=FALSE)
-```
+
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
     unzip("activity.zip")
     data <- read.csv("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
 
-```{r stepsPerDay}
+
+```r
     stepsPerDay <- tapply(data$steps, data$date, sum)
     hist(stepsPerDay, xlab = "Total number of steps taken per day", ylab = "Frequency", main = "Total Steps Per Day")
+```
+
+![](figure/stepsPerDay-1.png)<!-- -->
+
+```r
     StepsPerDay_Mean <- mean(stepsPerDay, na.rm = TRUE)
     StepsPerDay_Median <- median(stepsPerDay, na.rm = TRUE)
 ```
-The mean of the total number taken per day is `r StepsPerDay_Mean` and the Median is `r StepsPerDay_Median`.
+The mean of the total number taken per day is 1.0766189\times 10^{4} and the Median is 10765.
 
 ## What is the average daily activity pattern?
 
-```{r activityPattern}
+
+```r
     activityPattern <- tapply(data$steps, data$interval, mean, na.rm = TRUE)
     plot(activityPattern, type = "l", xlab = "Time interval", ylab = "Avg. number of steps across all days", main = "Daily activity pattern")
+```
+
+![](figure/activityPattern-1.png)<!-- -->
+
+```r
     maxInterval <- activityPattern[which(max(activityPattern) == activityPattern)]
     maxInterval <- names(maxInterval)
 ```
 
-The 5-minute interval that contains, on average across all the days in the dataset,  the maximum number of steps is `r maxInterval`.
+The 5-minute interval that contains, on average across all the days in the dataset,  the maximum number of steps is 835.
 
 ## Imputing missing values
 
-```{r missinValues}
+
+```r
     NAsum <- sum(is.na(data))
 ```
 
-The total number of missing values in the dataset is `r NAsum`.  
+The total number of missing values in the dataset is 2304.  
 To fill in the missing values I use the average steps count for the same 5-minute interval.
 
-```{r missingReplace}
+
+```r
     newData <- data
     newData[is.na(newData), "steps"] <- activityPattern[as.character(newData[is.na(newData), "interval"])]
     stepsPerDay_new <- tapply(newData$steps, newData$date, sum)
     hist(stepsPerDay_new, xlab = "Total number of steps taken per day", ylab = "Frequency", main = "Total Steps Per Day (after imputing missing values)")
+```
+
+![](figure/missingReplace-1.png)<!-- -->
+
+```r
     StepsPerDay_Mean_new <- mean(stepsPerDay_new, na.rm = TRUE)
     StepsPerDay_Median_new <- median(stepsPerDay_new, na.rm = TRUE)
 ```
 
-After imputing missing values the mean of the total number taken per day is `r StepsPerDay_Mean_new` and the Median is `r StepsPerDay_Median_new`.  
+After imputing missing values the mean of the total number taken per day is 1.0766189\times 10^{4} and the Median is 1.0766189\times 10^{4}.  
 Imputing the missing values had no impact on the mean and increased the median a little bit.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r weekdays}
+
+```r
     newData$date <- strptime(newData$date, "%Y-%m-%d")
     newData$weekDay = weekdays(newData$date)
     dayCat <- character(length = nrow(newData))
@@ -83,3 +97,5 @@ Imputing the missing values had no impact on the mean and increased the median a
         plot(weekdayActivity, type = "l", xlab = "Time interval", ylab = "Avg. number of steps", main = "Weekday activity pattern")
         plot(weekendActivity, type = "l", xlab = "Time interval", ylab = "Avg. number of steps", main = "Weekend activity pattern")
 ```
+
+![](figure/weekdays-1.png)<!-- -->
